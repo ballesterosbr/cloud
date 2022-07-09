@@ -67,7 +67,6 @@ Un nodo es un recurso que ejecuta los contenedores.
 
 `$ kubectl config get-contexts`
 
-
 ## Manifiestos de Kubernetes
 
 `namespace`: División lógica del cluster de kubernetes. Permite separar la carga en el cluster. Se suelen utilizar para dividir el tráfico o los recursos (por ejemplo, a partir del uso de políticas).
@@ -103,7 +102,6 @@ Al hacer esto nuevamente se crea uno nuevo con otro hash.
 Para ver el estado y eventos de un pod:
 
 `$ kubectl describe pod nombre_del_pod`
-
 
 ---
 
@@ -144,7 +142,6 @@ Ejecutar `sh` dentro del pod llamado `nginx`.
 `$ kubectl delete pod nginx`
 
 No se vuelve a levantar porque no hay ninguna política referida sobre esto.
-
 
 ## Opciones más comunes dentro del manifiesto de un pod
 
@@ -231,7 +228,7 @@ En resumen, un `Daemonset` es un `Deployment` sin réplicas.
 
 Es posible eliminar despliegues de la siguiente forma:
 
-`$ kubectl delete -f 04-deployment.yaml`
+`$ kubectl delete -f 03-daemonset.yaml`
 
 Archivo: `03-daemonset.yaml`
 
@@ -241,7 +238,7 @@ Si se consultan los pods:
 
 Se puede observar que hay 2 nginx porque existen 2 nodos, uno en cada nodo.
 
-Igual que sucedía con los deployments, si se mata a un podo, este vuelve a desplegarse de forma automática.
+Igual que sucedía con los deployments, si se mata a un pod, este vuelve a desplegarse de forma automática.
 
 `$ kubectl delete pod nginx-hash`
 
@@ -253,7 +250,7 @@ Un pod de `mysql` debería desplegare utilizando un `StatefulSet` de forma que e
 
 Esto se puede probar con un proveedor Cloud como puede ser DigitalOcean.
 
-Para consultar el volumen (PVC - PersistentVolumeClaim ):
+Para consultar el volumen (PVC - PersistentVolumeClaim):
 
 `$ kubectl get pvc`
 
@@ -277,7 +274,7 @@ Muy útil para manejar bases de datos, balanceadores de carga, s3 (Amazon)...
 
 Comentarios:
 
-- Cada pod tiene su propia IP, pero cada contenedor dentro de un pod compartirá la IP del pod. Si hay un podo con 3 contenedores, todos tendrán la misma IP que es la del pod. Es importante vigilar los puertos de los contenedores.
+- Cada pod tiene su propia IP, pero cada contenedor dentro de un pod compartirá la IP del pod. Si hay un pod con 3 contenedores, todos tendrán la misma IP que es la del pod. Es importante vigilar los puertos de los contenedores.
 
 En Kubernetes existen distintos tipos de servicios, que son el mecanismo que permite comunicar pods. Existen tres servicios:
 
@@ -401,4 +398,3 @@ A partir de las IP externa, se puede comprobar el funcionamiento del servicio de
 - [`ConfigMaps`](https://kubernetes.io/es/docs/concepts/configuration/configmap/): Un configmap es un objeto de la API utilizado para almacenar datos no confidenciales en el formato clave-valor. Los Pods pueden utilizar los ConfigMaps como variables de entorno, argumentos de la línea de comandos o como ficheros de configuración en un Volumen.
 
 - [`Secrets`](https://kubernetes.io/es/docs/concepts/configuration/secret/): Los objetos de tipo Secret en Kubernetes te permiten almacenar y administrar información confidencial, como contraseñas, tokens OAuth y llaves ssh. Poniendo esta información en un Secret es más seguro y flexible que ponerlo en la definición de un Pod o en un container image.
-

@@ -19,7 +19,7 @@ A la hora de configurar y construir una imagen, es conveniente especificar un us
 
 Por ejemplo:
 
-`# RUN groupadd -r testing && useradd -r -g testing testing`
+`RUN groupadd -r testing && useradd -r -g testing testing`
 
 Fragmento del Dockerfile:
 
@@ -88,15 +88,39 @@ Existe la posibilidad de especificar el permiso y acceso al sistema de archivos,
 
 Para ejecutar un contenedor con permiso de solo lectura:
 
-`$ docker run --read-only...`
+`$ docker run -ti --read-only --rm test_vuln /bin/bash`
+`
+Si se intenta crear un archivo se mostrará un mensaje de error indicando que sólo se tienen permisos de lectura sobre el file system:
 
-Si se requiere almacenar o modificar datos de alguna ruta en específico, se indica mediante el siguiente comando:
+```
+root@d6442a51ef5c:/# cd home/
+root@d6442a51ef5c:/home# touch file.text
+touch: cannot touch 'file.text': Read-only file system
+```
+
+Si se requiere almacenar o modificar datos en alguna ruta en específico, se indica mediante el siguiente comando:
 
 `$ docker run --read-only --tmpfs /tmp...`
 
 Siendo `/tmp` el sistema de archivos temporal, pero podría ser cualquier otro: `/home`, `/opt`...
 
+Ejemplo:
+
+`docker run -ti --read-only --tmpfs /home/alberto --rm test_vuln /bin/bash`
+
+Aquí se indica que el sistema de archivos temporal será `/home/alberto/` de forma que si no existe, docker lo creará en el contenedor. Sólo en este sistema de archivos se permitirá la creación de archivos.
+
+```
+root@d6442a51ef5c:/home# cd alberto/
+root@d6442a51ef5c:/home/alberto# touch file.txt
+root@d6442a51ef5c:/home/alberto# ls -l
+total 0
+-rw-r--r-- 1 root root 0 Jul  7 20:05 file.txt
+```
+
 ## Deshabilitar comunicación entre contenedores
+
+**incluir ejemplo**
 
 Por defecto los contenedores en Docker se ejecuten sobre una misma red común que permite la comunicación entre contenedores. Esta opción está habilita por defecto y se puede consultar de la siguiente forma:
 
