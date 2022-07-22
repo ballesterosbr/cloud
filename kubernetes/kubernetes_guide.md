@@ -1,18 +1,52 @@
 # Guía Kubernetes
 
-- [minikube](https://minikube.sigs.k8s.io/docs/start/): Kubernetes para uso en local
+## Tabla de contenidos
 
+- [Enlaces](#enlaces)
+- [Motivos para usar Kubernetes](#motivos-para-usar-kubernetes)
+- [Requisitos](#requisitos)
+- [Definiciones](#definiciones)
+- [Minikube](#minikube)
+    - [Añadir nodos en cluster Kubernetes](#añadir-nodos-en-cluster-kubernetes)
+    - [Listar nodos del cluster](#listar-nodos-del-cluster)
+- [`kubectl`](#kubectl)
+    - [Listar comandos `kubectl`](#listar-comandos-kubectl)
+    - [Comandos más utilizados](#comandos-más-utilizados)
+    - [Mostrar los contextos del archivo de configuración](#mostrar-los-contextos-del-archivo-de-configuración)
+- [Manifiestos de Kubernetes](#manifiestos-de-kubernetes)
+    - [Manifiesto para pod simple](#manifiesto-para-pod-simple)
+    - [Aplicar manifiesto de Kubernetes](#aplicar-manifiesto-de-kubernetes)
+    - [Ejecutar comando en pod](#ejecutar-comando-en-pod)
+    - [Borrar un pod sin mecanismo de reinicio](#borrar-un-pod-sin-mecanismo-de-reinicio)
+    - [Opciones más comunes dentro del manifiesto de un pod](#opciones-más-comunes-dentro-del-manifiesto-de-un-pod)
+- [Desplegar varios pods mediante `Deployment`](#desplegar-varios-pods-mediante-deployment)
+- [Desplegar varios pods mediante `Daemonset`](#desplegar-varios-pods-mediante-daemonset)
+- [Desplegar varios pods mediante `StatefulSet`](#desplegar-varios-pods-mediante-statefulset)
+- [Networking Kubernetes (Avanzado)](#networking-kubernetes-avanzado)
+- [Tipos de servicios](#tipos-de-servicios)
+	- [ClusterIP](#clusterip)
+	- [NodePort](#nodeport)
+	- [Load Balancer](#load-balancer)
+- [Otras opciones de interés](#otras-opciones-de-interés)
+---
+
+## Enlaces
+
+- [minikube](https://minikube.sigs.k8s.io/docs/start/): Kubernetes para uso en local
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/): Cliente de Kubernetes
 - Libro recomendado: [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/)
 
-Motivos para usar Kubernetes:
+## Motivos para usar Kubernetes
+
 - Cuando se tienen 10-20 instancias con Docker Compose empieza a ser problemático porque docker-compose **no escala**.
 - Es recomendable utilizar un servicio que maneje los contenedores. Kubernetes permite orquestar estos contenedores.
 
 ## Requisitos
 
-- Instalar [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) (Cliente de Kubernetes)
+- Instalar [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 - Iniciar cluster de kubernetes: `$ minikube start`
-- No es necesario usar kubernetes en una nube.
+- No es necesario usar kubernetes en un proveedor cloud para probar la mayoría de procesos descritos en este documento.
+
 *Los volúmenes y load balancers no se pueden probar con minikube*
 
 Comprobar instalación: 
@@ -23,30 +57,34 @@ Comprobar instalación:
 
 Al utilizar `minikube`, `kubectl` apunta directaente a `minikube`.
 
----
 ## Definiciones
 
-Contexto: Es una combinación de la URL del servidor con las credenciales que se usan para conectarse a él.
+*Contexto*: Es una combinación de la URL del servidor con las credenciales que se usan para conectarse a él.
 
-Un nodo es un recurso que ejecuta los contenedores.
+*Nodo*: recurso que ejecuta los contenedores.
+
+*Pod*: Los Pods son las unidades de computación desplegables más pequeñas que se pueden crear y gestionar en Kubernetes. Un Pod es un grupo de uno o más contenedores (como contenedores Docker), con almacenamiento/red compartidos, y unas especificaciones de cómo ejecutar los contenedores.
 
 `minikube` configura el archivo de configuración automáticamente. Este archivo de configuración se utiliza para conectar el clúster con `kubectl`.
 
 ---
+## Minikube
 
-## Añadir nodos en cluster Kubernetes
+### Añadir nodos en cluster Kubernetes
 
 `$ minikube node add [nombre]`
 
-## Listar nodos del cluster
+### Listar nodos del cluster
 
 `$ minikube node list`
 
-## Listar comandos `kubectl`
+## `kubectl`
+
+### Listar comandos `kubectl`
 
 `$ kubectl --help`
 
-## Comandos más utilizados
+### Comandos más utilizados
 
 - `get`: Para obtener recursos. Muy utilizado.
 - `edit`: Para editar los recursos
@@ -62,8 +100,7 @@ Un nodo es un recurso que ejecuta los contenedores.
     - `uncordon`: Hacer que el nodo pueda recibir más contenedores
     - `drain`: Sacar todos los contenedores del nodo, para moverlos a otro sitio.
 
-
-## Mostrar los contextos del archivo de configuración
+### Mostrar los contextos del archivo de configuración
 
 `$ kubectl config get-contexts`
 
@@ -103,9 +140,7 @@ Para ver el estado y eventos de un pod:
 
 `$ kubectl describe pod nombre_del_pod`
 
----
-
-## Manifiesto para pod simple
+### Manifiesto para pod simple
 
 Secciones:
 - `apiVersion`: La versión de la API de este recurso de Kubernetes. Puede cambiar dependiendo del tipo de recurso (`kind`). Hay que utilizar la documentación de Kubernetes para ver qué `apiVersion` usa el tipo `pod`.
@@ -117,7 +152,7 @@ Secciones:
 
 Archivo de ejemplo: `01-pod.yaml`.
 
-## Aplicar manifiesto de Kubernetes
+### Aplicar manifiesto de Kubernetes
 
 `$ kubectl apply -f 01-pod.yaml`
 
@@ -129,7 +164,7 @@ o
 
 `$ kubectl -n default get pods`
 
-## Ejecutar comando en pod
+### Ejecutar comando en pod
 
 `$ kubectl exec -it nginx -- sh`
 
@@ -137,13 +172,13 @@ Ejecutar `sh` dentro del pod llamado `nginx`.
 
 *No hace falta hacer ssh al nodo. Sólo se utiliza la API de Kubernetes.* 
 
-## Borrar un pod sin mecanismo de reinicio
+### Borrar un pod sin mecanismo de reinicio
 
 `$ kubectl delete pod nginx`
 
 No se vuelve a levantar porque no hay ninguna política referida sobre esto.
 
-## Opciones más comunes dentro del manifiesto de un pod
+### Opciones más comunes dentro del manifiesto de un pod
 
 - `env`: Variables de entorno. Igual que en Docker. Dentro de `env` se indica el nombre de la variable y el valor. El valor se puede heredar a partir de información contenida en Kubernetes ([`downward API`](https://kubernetes.io/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/)), por ejemplo: `status.hosIP`.
 
@@ -282,7 +317,7 @@ En Kubernetes existen distintos tipos de servicios, que son el mecanismo que per
 - `NodePort`: Crea un puerto en cada nodo que va a recibir el tráfico y lo va a mandar a los pods específicos. Por ejemplo, si quiero acceder al pod del servicio A y le pego al worker a un puerto en específico, ese tráfico va a encontrar el nodo que está corriendo ese pod y encontrará el tráfico
 - `LoadBalancer`: Enfocado a la nube, crear balanceadores de carga en nuestro proveedor y redireccionará el tráfico entre los pods.
 
-### Ejemplos tipos de servicios
+### Tipos de servicios
 
 Para esta parte se lanzará un pod con Ubuntu que se dejará en `sleep`.
 
@@ -393,7 +428,7 @@ A partir de las IP externa, se puede comprobar el funcionamiento del servicio de
 
 *Este servicio dependerá de un servicio en la Nube para obtener la IP externa.*
 
-## Otras cosas de interés:
+## Otras opciones de interés:
 
 - [`ConfigMaps`](https://kubernetes.io/es/docs/concepts/configuration/configmap/): Un configmap es un objeto de la API utilizado para almacenar datos no confidenciales en el formato clave-valor. Los Pods pueden utilizar los ConfigMaps como variables de entorno, argumentos de la línea de comandos o como ficheros de configuración en un Volumen.
 
